@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Upload Video</title>
-    <link href="{{ url_for('static', path='/style.css') }}" rel="stylesheet">
+    <title>Video Prediction</title>
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
 </head>
 <body>
-    <h1>Upload a video to analyze</h1>
+    <h1>Vidieo Slang Detection</h1>
     <form action="/analyze/" method="post" enctype="multipart/form-data">
         <input type="file" name="file">
-        <input type="submit">
+        <button type="submit" class="button">제출</button>
     </form>
 </body>
 </html>
