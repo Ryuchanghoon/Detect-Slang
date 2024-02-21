@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   web:
     build: .
@@ -8,20 +9,19 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
-    environment:
-      DATABASE_URL: "postgresql://postgres:4dlstjs4ak!@postgres-server:5432/postgres"
+      - postgres-db
 
-  db:
-    image: postgres:13
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+  postgres-db:
+    image: postgres:14
+    container_name: postgres-db
     environment:
+      POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 4dlstjs4ak!
-      POSTGRES_DB: postgres
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data:

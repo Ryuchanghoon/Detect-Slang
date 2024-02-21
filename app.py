@@ -7,24 +7,40 @@ from tensorflow.keras.models import load_model
 import shutil
 import os
 import psycopg2
+from psycopg2.extras import RealDictCursor
+
 
 app = FastAPI()
+
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+
 model = load_model('Slang_CNN_model.h5')
+
 
 temp_dir = 'temp'
 os.makedirs(temp_dir, exist_ok=True)
 
-# 데이터베이스 연결 설정
-DATABASE_URL = "postgresql://postgres:4dlstjs4ak!@postgres-server:5432/postgres"
-db_connect = psycopg2.connect(DATABASE_URL)
+
+# DB 연결
+def get_db_connection():
+    return psycopg2.connect(
+        host="postgres-db", 
+        database="postgres", #
+        user="postgres", #
+        password="4dlstjs4ak!", #
+        port = 5432 #
+    )
+
+
 
 @app.get("/")
 async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+
 
 @app.post("/analyze/")
 async def analyze_video(request: Request, username: str = Form(...), file: UploadFile = File(...)):
@@ -46,12 +62,11 @@ async def analyze_video(request: Request, username: str = Form(...), file: Uploa
             if not ret:
                 break
 
-            if frame_count % (5 * fps) == 0:  # 5초마다 이미지 짜르고 저장.
+            if frame_count % (5 * fps) == 0:
                 img_path = os.path.join(temp_dir, f"frame_at_{frame_count // fps}sec.jpg")
                 cv2.imwrite(img_path, frame)
-                # 이미지 전처리                
-                img = cv2.resize(frame, (28, 28)) 
-                img = img / 255.0  
+                img = cv2.resize(frame, (28, 28))
+                img = img / 255.0
                 img = np.expand_dims(img, axis=0)
                 prediction = model.predict(img)
                 if prediction[0][0] < 0.5:
@@ -68,7 +83,6 @@ async def analyze_video(request: Request, username: str = Form(...), file: Uploa
 
     os.remove(temp_file_path)
 
-    # 결과 메시지 결정
     if count_swear >= 5:
         message = "욕 하지 마라."
     elif 2 <= count_swear < 5:
@@ -76,8 +90,9 @@ async def analyze_video(request: Request, username: str = Form(...), file: Uploa
     else:
         message = "바른 행동의 사람입니다. 참 좋습니다."
 
-    # 데이터베이스에 결과 저장
-    with db_connect.cursor() as cur:
+
+    db_connect = get_db_connection()
+    with db_connect.cursor(cursor_factory=RealDictCursor) as cur:
         insert_query = """
         INSERT INTO user_swear_count (username, swear_count, detected_at)
         VALUES (%s, %s, NOW());
