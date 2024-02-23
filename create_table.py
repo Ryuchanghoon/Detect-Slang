@@ -11,14 +11,17 @@ def create_tables():
         )
         """,
     )
+
     conn = None
     try:
-        # DB 연결
+        
         conn = psycopg2.connect(
-            host="localhost",
-            database="postgres",
+            host="postgres-server",
+            database="slang",
             user="postgres",
-            password="4dlstjs4ak!")
+            password="#############",
+            port = '5432')
+        
         cur = conn.cursor()
 
         for command in commands:

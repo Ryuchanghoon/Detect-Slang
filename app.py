@@ -10,6 +10,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 
 
+
 app = FastAPI()
 
 
@@ -20,6 +21,7 @@ templates = Jinja2Templates(directory="templates")
 model = load_model('Slang_CNN_model.h5')
 
 
+
 temp_dir = 'temp'
 os.makedirs(temp_dir, exist_ok=True)
 
@@ -27,10 +29,10 @@ os.makedirs(temp_dir, exist_ok=True)
 # DB 연결
 def get_db_connection():
     return psycopg2.connect(
-        host="postgres-db", 
-        database="postgres", #
+        host="postgres-server", 
+        database="slang", #
         user="postgres", #
-        password="4dlstjs4ak!", #
+        password="#########", #
         port = 5432 #
     )
 

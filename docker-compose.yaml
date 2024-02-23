@@ -1,27 +1,23 @@
-version: '3.8'
+version: "3"
 
 services:
-  web:
-    build: .
-    command: uvicorn app:app --host 0.0.0.0 --reload
-    volumes:
-      - .:/app
-    ports:
-      - "8000:8000"
-    depends_on:
-      - postgres-db
-
-  postgres-db:
-    image: postgres:14
-    container_name: postgres-db
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 4dlstjs4ak!
+  postgres-server:
+    image: postgres:14.0
+    container_name: postgres-server
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ###########
+      POSTGRES_DB: slang
 
-volumes:
-  postgres_data:
+  data-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: data-generator
+    depends_on:
+      - postgres-server
+    ports:
+      - "8000:8000" 
+    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload 
